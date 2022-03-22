@@ -13,6 +13,7 @@ mod info;
 mod io;
 mod loader;
 mod path;
+mod proxy_handle;
 
 pub mod prelude {
     #[doc(hidden)]
@@ -27,6 +28,7 @@ pub use info::*;
 pub use io::*;
 pub use loader::*;
 pub use path::*;
+pub use proxy_handle::*;
 
 use bevy_app::{prelude::Plugin, App};
 use bevy_ecs::schedule::{StageLabel, SystemStage};

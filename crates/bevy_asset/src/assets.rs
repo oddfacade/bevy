@@ -1,6 +1,6 @@
 use crate::{
     update_asset_storage_system, Asset, AssetLoader, AssetServer, AssetStage, Handle, HandleId,
-    RefChange,
+    ProxyHandle, RefChange,
 };
 use bevy_app::App;
 use bevy_ecs::{
@@ -299,6 +299,7 @@ impl AddAsset for App {
             .add_system_to_stage(AssetStage::AssetEvents, Assets::<T>::asset_event_system)
             .add_system_to_stage(AssetStage::LoadAssets, update_asset_storage_system::<T>)
             .register_type::<Handle<T>>()
+            .register_type::<ProxyHandle<T>>()
             .add_event::<AssetEvent<T>>()
     }
 

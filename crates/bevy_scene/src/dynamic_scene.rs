@@ -2,7 +2,7 @@ use crate::{serde::SceneSerializer, Scene, SceneSpawnError};
 use anyhow::Result;
 use bevy_ecs::{
     entity::EntityMap,
-    reflect::{ReflectComponent, ReflectMapEntities},
+    reflect::{ReflectComponent, ReflectMapEntities, ReflectProxyComponent},
     world::World,
 };
 use bevy_reflect::{Reflect, TypeRegistryArc, TypeUuid};
@@ -97,6 +97,12 @@ impl DynamicScene {
                     .ok_or_else(|| SceneSpawnError::UnregisteredType {
                         type_name: component.type_name().to_string(),
                     })?;
+
+                if let Some(reflect_proxy) = registration.data::<ReflectProxyComponent>() {
+                    reflect_proxy.resolve_and_add(world, entity, component.as_ref());
+                    continue;
+                }
+
                 let reflect_component =
                     registration.data::<ReflectComponent>().ok_or_else(|| {
                         SceneSpawnError::UnregisteredComponent {

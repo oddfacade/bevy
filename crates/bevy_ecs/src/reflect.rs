@@ -4,6 +4,7 @@ pub use crate::change_detection::ReflectMut;
 use crate::{
     component::Component,
     entity::{Entity, EntityMap, MapEntities, MapEntitiesError},
+    proxy::Proxy,
     world::{FromWorld, World},
 };
 use bevy_reflect::{
@@ -150,6 +151,35 @@ impl<C: Component + MapEntities> FromType<C> for ReflectMapEntities {
                     }
                 }
                 Ok(())
+            },
+        }
+    }
+}
+
+#[derive(Clone)]
+pub struct ReflectProxyComponent {
+    resolve_and_add_func: fn(&mut World, Entity, &dyn Reflect),
+}
+
+impl ReflectProxyComponent {
+    pub fn resolve_and_add(&self, world: &mut World, entity: Entity, proxy: &dyn Reflect) {
+        (self.resolve_and_add_func)(world, entity, proxy);
+    }
+}
+
+impl<T> FromType<T> for ReflectProxyComponent
+where
+    T: Proxy + FromWorld + Reflect,
+    T::Target: Component,
+{
+    fn from_type() -> Self {
+        ReflectProxyComponent {
+            resolve_and_add_func: |world, entity, reflected_proxy| {
+                let mut proxy = T::from_world(world);
+                proxy.apply(reflected_proxy);
+                if let Some(component) = proxy.resolve(world) {
+                    world.entity_mut(entity).insert(component);
+                }
             },
         }
     }
